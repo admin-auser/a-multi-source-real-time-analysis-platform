@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="{{ url_for('static', filename='jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='echarts.min.js') }}"></script>
+</head>
+<body>
+    <h1>文件上传示例</h1>
+    <form action="" enctype='multipart/form-data' method='POST'>
+        <input type="file" name="file">
+        <input type="submit" value="上传">
+    </form>
+    <!--为ECharts准备一个具备大小（宽高）的Dom-->
+    <div id="main" style="height:500px;border:1px solid #ccc;padding:10px;"></div>
+    <script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 显示标题，图例和空的坐标轴
+    myChart.setOption({
+	color:['0000ff','ff0000'],
+        title: {
+            text: '多数据源结果展示'
+        },
+        tooltip: {},
+        legend: {
+            data:['优','劣']
+        },
+        xAxis: {
+            data: []
+        },
+        yAxis: {},
+        series: [{
+            name: '优',
+            type: 'line',
+            data: []
+        },{
+            name: '劣',
+            type: 'line',
+            data: []
+        }]
+    });
+
+    myChart.showLoading(); // 显示加载动画
+
+    // 异步加载数据
+    $.get('/water').done(function (data) {
+        myChart.hideLoading(); // 隐藏加载动画
+
+        // 填入数据
+        myChart.setOption({
+            xAxis: {
+				type : 'category',
+                data: data.month,
+				boundaryGap : false,
+				axisLabel : {
+                 interval:0,
+                 rotate:45,
+
+               }
+            },
+            series: [{
+                name: '优', // 根据名字对应到相应的系列
+				itemStyle : {
+                    normal : {
+                        lineStyle:{
+                             color:'#0000ff'
+                        }
+                    }
+                },
+                data: data.good
+            },{
+                name: '劣',
+				itemStyle : {
+                    normal : {
+                        lineStyle:{
+                             color:'#ff0000'
+                        }
+                    }
+                },
+                data: data.poor
+            }]
+        });
+    });
+    </script>
+    <!--{% for c in allcontent %}
+    	{{ c }}
+    {% endfor %}-->
+</body>
+</htmli>
